@@ -46,12 +46,19 @@ Primero pasa por el lexer que se encarga de separar la expresión en tokens con 
 
 | Prueba | Componente | Comportamiento que verifica | ¿Cuántos operadores usa? | ¿Normal, frontera o inválida? |
 |---|---|---|---|---|
-| | | | | |
-
-> Llenen la tabla **completa**, con las 13. Es tediosa a propósito: la única
-> forma de saber qué no está cubierto es caracterizar sistemáticamente lo que
-> sí. Cuando terminen, léanla como columna, no como renglones, y pregúntense
-> qué combinación **no aparece nunca**.
+| `test_suma` | Evaluator | Calcular bien la suma de 2 enteros. | 1 (`+`) | Normal |
+| `test_resta` | Evaluator | Calcular bien la resta de 2 enteros. | 1 (`-`) | Normal |
+| `test_multiplicacion` | Evaluator | Calcular correctamente el producto/multiplicación de 2 enteros. | 1 (`*`) | Normal |
+| `test_division` | Evaluator | Calcular correctamnete la división de 2 enteros. | 1 (`/`) | Normal |
+| `test_precedencia_sin_parentesis` | Evaluator | El resultado respetando la jerarquía con base a la precedencia implícita. | 2 (`+`, `*`) | Normal |
+| `test_precedencia_con_parentesis` | Evaluator | El resultado alterando la prioridad jerárquica con paréntesis. | 2 (`+`, `*`) | Normal |
+| `test_tokeniza_un_numero_solo` | Lexer | "Tokenización" de un número entero a... un token | 0 | Normal |
+| `test_tokeniza_una_suma` | Lexer | Reconocimiento de operandos y operador binario, así como su secuencia correcta de ejecución. | 1 (`+`) | Normal |
+| `test_los_espacios_no_producen_tokens` | Lexer | Descarta la existencia de cualquier espacio blanco para no hacerlo token.| 1 (`+`) | Frontera |
+| `test_tokeniza_parentesis` | Lexer | Denota a los paréntesis/símbolos de agrupación para la cohesión estructural. | 0 | Normal |
+| `test_construye_el_arbol_de_una_suma` | Parser | Construcción de un AST de un solo nivel para representar la suma (como que el nombre del test es muy explicatorio per se, para todos). | 1 (`+`) | Normal |
+| `test_la_multiplicacion_se_agrupa_antes_que_la_suma` | Parser | Anidar a los nodos propiamente priorizand la multiplicación (racismo de operandos). | 2 (`+`, `*`) | Normal |
+| `test_los_parentesis_cambian_la_agrupacion` | Parser | Anidar a los nodos con base a los paréntesis. | 2 (`+`, `*`) | Normal |
 
 ### 2.2 ¿Qué comportamientos **no** estaban probados?
 
