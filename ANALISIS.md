@@ -57,7 +57,30 @@ El AST dibujado por el equipo antes de hacer la prueba coincidió con el dibujo 
 
 ### 2.2 ¿Qué comportamientos **no** estaban probados?
 
-> Ésta es la pregunta importante de toda la tarea. Tómense su tiempo.
+Para lexer:
+1. Reconocer a números de varios dígitos y a símbolos como tokens
+2. Responder correctamente a las operaciones sin importar los espacios y saltos de línea que se ingresen
+3. Manejar el caso en el que se ingrese un caracter con el que el programa no pueda trabajar
+4. Manejar el caso en el que se ingresen letras junto a los números
+
+Para parser:
+1. Colocar el operador "*" (multiplicación) en un nivel inferior al operador "+" (suma) en el AST
+2. Realizar las operaciones con resta en orden de izquierda a derecha cuando no hay paréntesis ni operaciones de mayor jerarquía
+3. Realizar las operaciones con división en orden de izquierda a derecha cuando no hay paréntesis ni operaciones de menor jerarquía
+4. Manejar el caso en el que un paréntesis no se cierre correctamente
+5. Manejar el caso en el que se ingrese una operación que no contenga ningún operador
+
+Para evaluator:
+1. Realizar operaciones corretamente que contengan paréntesis dentro de otros paréntesis
+2. Realizar correctamente las operaciones que involucren tres números
+3. Realizar correctamente operaciones donde haya dos operandos involucrados
+4. Manejar en caso en el que se haga una división cualquiera con el 0 como divisor
+5. Manejar el caso en el que se intenten realizar operaciones con números negativos
+6. Producir un resultado flotante para las divisiones
+7. Realizar operaciones binarias en un AST de forma correcta
+8. Producir un resultado negativo para una resta cuando sea el caso
+9. Rechazar símbolos que no representen números ni operandos en un AST
+10. Manejar el caso en el que se intente dividir un número entre 0 en un árbol binario
 
 ---
 
