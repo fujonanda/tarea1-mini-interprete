@@ -112,3 +112,31 @@ def test_resta_y_suma():
 def test_division_y_multiplicacion():
     # falla
     assert interpretar("36 / 3 * 2") == 24
+
+#Casos Normales en AST#
+
+#Estas pruebas en AST se encargan de comprobar a las operaciones básicas en el AST y correcta organización a nivel de nodos
+#Explicación de esta eleccioń en DECLARACION_IA.md
+def test_suma_básica_en_AST():
+    ast = OperacionBinaria("+", Numero(6), Numero(7))
+    assert evaluar(ast) == 13    
+
+def test_resta_básica_en_AST():
+    ast = OperacionBinaria("-", Numero(9), Numero(3))
+    assert evaluar(ast) == 6
+
+def test_producto_básico_en_AST():
+    ast = OperacionBinaria("*", Numero(9), Numero(11))
+    assert evaluar(ast) == 99
+
+#Casos frontera en AST#
+
+def test_división_válida_con_float_decimal():
+    ast = OperacionBinaria("/", Numero(13), Numero(2))
+    assert evaluar(ast) == 6.5
+ 
+def test_resta_con_resultado_negativo():
+    ast = OperacionBinaria("-", Numero(9), Numero(11))
+    assert evaluar(ast) == -2
+
+#Casos inválidos en AST#
