@@ -1,8 +1,10 @@
 """Pruebas del parser: de los tokens al AST."""
 
+import pytest
 from mini_interprete.ast import Numero, OperacionBinaria
 from mini_interprete.lexer import tokenizar
 from mini_interprete.parser import Parser
+from mini_interprete.errores import ErrorDeSintaxis
 
 
 def arbol_de(texto):
