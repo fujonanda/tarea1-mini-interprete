@@ -1,15 +1,11 @@
 # Análisis — Tarea 1
 
 **Integrantes:**
-1.
-2.
-3.
+1. Correa Merino Fernanda
+2. Pérez Hernández Francisco Gadiel
 
-**Fork:**
-**Rama:**
-
-> Contesten en este archivo. Respuestas breves y concretas: se califica que
-> hayan entendido, no la extensión.
+**Fork: https://github.com/fujonanda/tarea1-mini-interprete.git**
+**Rama: tarea1-pruebas-refactorizacion**
 
 ---
 
@@ -19,27 +15,29 @@
 
 | Componente | Qué recibe | Qué entrega | De qué es responsable |
 |---|---|---|---|
-| `lexer` | | | |
-| `parser` | | | |
-| `ast` | | | |
-| `evaluator` | | | |
+| `lexer` |Secuencia de caracteres del código fuente|Unidades con significado (tokens)|Convertir caracteres en tokens con un significado que la computadora pueda entender|
+| `parser` |Secuencia de tokens|Representación estructurada de la relación entre los tokens|Definir cómo pueden relacionarse los tokens entre sí considerando las reglas gramáticales|
+| `ast` |Datos obtenidos del parser|Estructura que representa la jerarquía de los tokens|Representar las operaciones y la jerarquía de los tokens presentes en el programa|
+| `evaluator` |La representación de las operaciones hechas a los tokens|El resultado de evaluar las operaciones|Determinar si la operación puede producir un resultado o si se trata de un error|
 
 ### 1.2 ¿Qué recorrido sigue una expresión desde que se recibe como texto hasta que produce un resultado?
+Primero pasa por el lexer que se encarga de separar la expresión en tokens con significado para la computadora, los tokens pasan al parser donde se usan las reglas gramáticales definidas por el lenguaje para crear una representación del orden que llevan las operaciones, dicha representación puede tratarse de un AST, después el evaluator analiza la estructura de la representación creada y determina si la operación es correcta para producir su resultado, en caso de ser incorrecta la marca como un error
 
 > Usen `(3 + 4) * 2` como ejemplo y muestren cómo se ve entre etapa y etapa.
 
 | Etapa | Cómo se ve `(3 + 4) * 2` aquí |
 |---|---|
 | texto | `"(3 + 4) * 2"` |
-| tokens | |
-| AST | |
-| resultado | |
+| tokens | [Token(PAR_IZQ, '(', 0), Token(NUMERO, 3, 1), Token(MAS, '+', 3), Token(NUMERO, 4, 5), Token(PAR_DER, ')', 6), Token |
+| | (POR, '*', 8), Token(NUMERO, 2, 10)] |
+| AST | * |
+| | |-- + |
+| | |   |-- 3 |
+| | |   `-- 4 |
+| | `-- 2 |
+| resultado | 14 |
 
-> Para el renglón del AST, dibújenlo **primero ustedes** y después comprueben
-> con `python3 interprete.py --arbol "(3 + 4) * 2"`. Si su dibujo y el del
-> programa no coinciden, uno de los dos está mal, y averiguar cuál es
-> justamente el trabajo.
-
+> El AST dibujado por el equipo antes de hacer la prueba coincidió con el dibujo del árbol realizado por el programa
 ---
 
 ## 2. Las pruebas que ya estaban
