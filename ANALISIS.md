@@ -28,16 +28,11 @@ Primero pasa por el lexer que se encarga de separar la expresión en tokens con 
 | Etapa | Cómo se ve `(3 + 4) * 2` aquí |
 |---|---|
 | texto | `"(3 + 4) * 2"` |
-| tokens | [Token(PAR_IZQ, '(', 0), Token(NUMERO, 3, 1), Token(MAS, '+', 3), Token(NUMERO, 4, 5), Token(PAR_DER, ')', 6), Token |
-| | (POR, '*', 8), Token(NUMERO, 2, 10)] |
-| AST | * |
-| | |-- + |
-| | |   |-- 3 |
-| | |   `-- 4 |
-| | `-- 2 |
+| tokens | [Token(PAR_IZQ, "(", 0), Token(NUMERO, 3, 1), Token(MAS, "+", 3), Token(NUMERO, 4, 5), Token(PAR_DER, ")", 6), Token (POR, "*", 8), Token(NUMERO, 2, 10)] |
+| AST | Raíz: [Operador "*"] Nivel 1: [Número 2] [Operador "+"] Nivel 2: [Número 3] [Número 4] |
 | resultado | 14 |
 
-> El AST dibujado por el equipo antes de hacer la prueba coincidió con el dibujo del árbol realizado por el programa
+El AST dibujado por el equipo antes de hacer la prueba coincidió con el dibujo del árbol realizado por el programa
 ---
 
 ## 2. Las pruebas que ya estaban
