@@ -1,33 +1,36 @@
-"""Del AST a un numero.
-
-Recorre el arbol de abajo hacia arriba: para evaluar una operacion hay que
-evaluar primero sus dos lados.
-"""
-
 from .ast import Numero, OperacionBinaria
 from .errores import ErrorDeEvaluacion
 
 
 def evaluar(nodo):
     """Evalua un nodo del AST y regresa su valor."""
-    if isinstance(nodo, Numero):
-        return nodo.valor
+    match nodo:
+        # Caso Base: el valor de Numero sin más
+        case Numero(valor=v):
+            return v
+        
+        # Caso Recursivo: extraemos los atributos de la OperacionBinaria
+        case OperacionBinaria(operador=op, izquierda=izq, derecha=drc):
+            val_izq = evaluar(izq)
+            val_drc = evaluar(drc)
+            
+            # Match anidado para asignar al operador matemático
+            match op:
+                case "+":
+                    return val_izq + val_drc
+                case "-":
+                    return val_izq - val_drc
+                case "*":
+                    return val_izq * val_drc
+                case "/":
+                    if val_drc == 0:
+                        raise ErrorDeEvaluacion("division entre cero")
+                    return val_izq / val_drc
+                
+                # Operador no contemplado en la gramática
+                case _:
+                    raise ErrorDeEvaluacion(f"operador desconocido: {op!r}")
 
-    if isinstance(nodo, OperacionBinaria):
-        izquierda = evaluar(nodo.izquierda)
-        derecha = evaluar(nodo.derecha)
-
-        if nodo.operador == "+":
-            return izquierda + derecha
-        if nodo.operador == "-":
-            return izquierda - derecha
-        if nodo.operador == "*":
-            return izquierda * derecha
-        if nodo.operador == "/":
-            if derecha == 0:
-                raise ErrorDeEvaluacion("division entre cero")
-            return izquierda / derecha
-
-        raise ErrorDeEvaluacion(f"operador desconocido: {nodo.operador!r}")
-
-    raise ErrorDeEvaluacion(f"nodo desconocido: {nodo!r}")
+        # Nodo no reconocido (véase un string o un objeto ajeno al AST)
+        case _:
+            raise ErrorDeEvaluacion(f"nodo desconocido: {nodo!r}")
