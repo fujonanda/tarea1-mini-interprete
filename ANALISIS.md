@@ -127,19 +127,30 @@ Para evaluator:
 ## 4. Los defectos
 
 ### 4.1 ¿Qué defecto reveló primero una prueba nueva?
+Las operaciones que involucraban operaciones de la misma jerarquía y que no usaban paréntesis para definir un orden se resolvían comenzando por la derecha y terminando por la izquierda, lo que provocó que en operaciones con restas o divisiones de por medio el resultado fuera erróneo. Lo mismo ocurría para las operaciones binarias con los AST.
+A su vez, el programa no lanzaba los errores definidos para el caso en el que se ingresaran números junto con letras, se ingresaba un caracter desconocido el programa o no se agregara ningún operador a la operación.
+Para el caso en el que no se cerraba un paréntesis que ya se había abierto el programa lanzaba IndexError
 
 ### 4.2 ¿Por qué el comportamiento observado era incorrecto?
 
-> No basta con "daba mal". Digan contra qué lo están comparando: qué regla,
-> qué línea de la semántica declarada del README.
+- Línea 6 de la semántica: Indica que en caso de tener una operación con operadores de la misma precedencia estos deben asociarse a la izquierda, cosa que no pasó y es por eso que las operaciones de este tipo que involucraban operadores sensibles a los cambios de orden generaran resultados erróneos
+- Línea 8 de la semántica: Indica que las entradas erróneas deben rechazarse con ErrorDeSintaxis en lugar de errores propios de Python, esto no sucedía cuando se ingresaban caracteres que no se encontraban definidos en los comandos del intérprete o en su defecto cuando a una operación le faltaban tokens para considerarse válida
 
 ### 4.3 ¿Qué cambio realizaron?
 
 | Defecto | Entrada que lo revela | Daba | Debería dar | Commit rojo | Commit verde |
 |---|---|---|---|---|---|
-| | | | | | |
+| Las restas de más de tres números se asociaban hacia la derecha | "10 - 5 - 3" | 8 | 2 | 15a38d6 | b9833f8 |
+| Las divisiones de más de tres números se asociaban a la derecha | "50 / 2 / 5" | 125.0 | 5.0 | 15a38d6 | b9833f8 |
+| Las operaciones binarias se asociaban de derecha a izquierda | "36 / 6 / 3" | OperacionBinaria("/", OperacionBinaria("/", Numero(6), Numero(3)), Numero(36)) | OperacionBinaria("/", OperacionBinaria("/", Numero(36), Numero(6)), Numero(3)) | 14853c0 | b9833f8 |
+| Ingresar un caracter desconocido no lanzaba ErrorDeSintaxis | "6 $ 9" | No marcaba ningún errorErrorDeSintaxis | ErrorDeSintaxis | 87c06dd | 937e8d6 |
+| Ingresar números acompañados de letras no lanzaba ErrorDeSintaxis | "10a + 5" | No marcaba ningún errorErrorDeSintaxis | ErrorDeSintaxis | 87c06dd | 937e8d6 |
+| La falta del cierre de un paréntesis lanzaba IndexError | "(24 - 27" | IndexError | ErrorDeSintaxis | 14853c0 | b9833f8 |
+| La falta de operador en una operación no lanzaba ErrorDeSintaxis | "2 12" | No marcaba ningún errorErrorDeSintaxis | ErrorDeSintaxis | 14853c0 | b9833f8 |
 
 ### 4.4 ¿Cómo saben que la corrección es general y no sólo hace pasar ese ejemplo?
+
+Se cambió el funcionamiento general del programa no solo para adecuarse al alcance de las nuevas pruebas que se definieron, sino a cualquier otro caso que pudiera presentarse. En el parser se cambió la forma en la que se asocian las operaciones para que, sin importar de cuántos números y operadores conste, siempre se iniciará su resolución por la izquierda y se terminará por la derecha. Por su parte se definió en el lexer que se lance un ErrorDeSintaxis cada vez que aparezca un símbolo o caracter no definido como token válido para el intérprete
 
 ---
 
