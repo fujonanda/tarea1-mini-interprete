@@ -30,8 +30,9 @@
 
 | Para qué la usamos | En qué parte del entregable |
 |---|---|
-| Asistencia con git | La creación y modificaciones del repositorio donde se encuentra el entregable |
+| Asistencia con git | La creación y modificación del repositorio donde se encuentra el entregable |
 | Clasificación de las nuevas pruebas propuestas (casos normales, fronteras e inválidos) | En la documentación y organización de las pruebas dentro de los archivos test |
+| Comprobar que las definiciones de nuestros casos y pruebas fueran correctas y extrapolares | En las pruebas sugeridas por nosotros en los archivos test | 
 
 ---
 
@@ -286,23 +287,11 @@ No soy ingeniero grosero
 
 ### 4.1 Si la usaron para el análisis: el contraste
 
-Se les pidió intentarlo primero por su cuenta. Si lo hicieron así:
-
-| | |
-|---|---|
-| ¿Qué encontró la herramienta que ustedes **no** habían notado? | |
-| ¿Qué **no** encontró, que en este curso sí consideramos un problema? | |
-
-> La segunda es la que más nos interesa. Una herramienta suele no señalar la
-> duplicación de código, porque el programa funciona igual. Ustedes ya saben
-> por qué eso sí importa.
->
-> Si no usaron IA para el análisis, escriban *"no aplica"*.
+*"No aplica"*
 
 ### 4.2 ¿Cómo verificaron que lo que incorporaron era correcto?
 
-> Una prueba que escribieron, una ejecución, un contraste contra las notas de
-> clase o contra el enunciado. *"Lo revisamos"* no es una verificación.
+Escribimos varias pruebas para el mismo comportamiento, como es el caso de las operaciones que probamos estructuraciones distintas para todos los operadores disponibles. La mayoría pasaron desde el momento en que se plantearon pero el objetivo era que se mantuvieran así, esto para demostrar que los cambios hechos al código estaban pensados tanto para corregir los errores que provocaban fallos en algunas pruebas como para funcionar en muchos otros casos posibles ya sea nuevos o planteados desde un inicio
 
 ---
 
@@ -310,11 +299,12 @@ Se les pidió intentarlo primero por su cuenta. Si lo hicieron así:
 
 ### 5.1 ¿Qué limitación concreta observaron **en esta actividad**?
 
-> Concreta. No *"a veces se equivoca"*, sino *"propuso pruebas sólo para
-> m = 4 y nunca para órdenes impares, porque no conocía la definición del
-> laboratorio"*.
+La IA generativa que usamos tenía una tendencia a "dar el avión" cuando se le cuestionaba de sus respuestas, en los prompts que añadimos al documento se puede apreciar parcialmente una pequeña discusión que hubo respecto a cómo clasificar las pruebas que propusimos ya que en los casos que podían entrar en más de una clasificación la IA no decidía cómo definirla, y las vueltas que le dio al asunto tampoco fueron de mucha ayuda para despejar nuestras dudas.
+De modo similar le pedimos ideas para desarrollar pruebas más complejas y todo lo que generó estuvo orientado a la creación de árboles porque, de acuerdo a lo que nos dijo, estos trabajaban exclusiva y directamente sobre evaluator. Esto demostró que el entendimiento que tiene del código es muy parcial y enfocado en un punto muy específico, lo que hace que ignore casos que puedan provenir de otras partes pero que de igual manera necesitan probarse como es el caso de las operaciones y su resolución.
 
 ### 5.2 ¿Qué harían distinto la próxima vez?
+
+Principalmente iniciar la tarea con más tiempo de anticipación, hubo cuestiones que pudimos discutir con nuestros compañeros o que pudimos tomarnos más tiempo para meditar pero que por falta de tiempo tuvimos que relegar parcialmente a la IA. 
 
 ---
 
@@ -325,4 +315,5 @@ Se les pidió intentarlo primero por su cuenta. Si lo hicieron así:
 
 | Nombre | Número de cuenta |
 |---|---|
-| | |
+| Correa Merino Fernanda | 323145673 |
+| Pérez Hernández Francisco Gadiel | 323183839
