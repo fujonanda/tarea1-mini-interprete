@@ -279,7 +279,9 @@ No soy ingeniero grosero
 
 | Qué produjo la herramienta | ¿Aceptado, modificado o descartado? | Por qué | Dónde quedó (archivo / commit) |
 |---|---|---|---|
-| | | | |
+| Clasificación de las pruebas que desarrollamos | Descartado | Fue bastante ambiguo respecto a los motivos que tenía para considerar a cada prueba como parte de una clasificación, terminamos sacando nuestras conclusiones por nuestra propia cuenta | 15a38d6, se eliminó en 9fd8358 |
+| Ideas de pruebas complejas para evaluator | Descartado | Todas estaban enfocadas en árboles y no tomó en cuenta más partes del funcionamiento de evaluator | No se añadieron |
+| Comandos de git | Aceptado | Fueron útiles para solucionar problemas que tuvimos con el flujo de trabajo | Repositorio de tarea1-mini-interprete |
 
 > **"Lo descartamos" es una respuesta excelente**, si dicen por qué.
 > Una declaración donde todo se aceptó sin cambios es una declaración que
@@ -317,4 +319,4 @@ Principalmente iniciar la tarea con más tiempo de anticipación, hubo cuestione
 | Nombre | Número de cuenta |
 |---|---|
 | Correa Merino Fernanda | 323145673 |
-| Pérez Hernández Francisco Gadiel | 323183839
+| Pérez Hernández Francisco Gadiel | 323183839 |
