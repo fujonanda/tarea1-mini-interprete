@@ -1,15 +1,11 @@
 # Análisis — Tarea 1
 
 **Integrantes:**
-1.
-2.
-3.
+1. Correa Merino Fernanda
+2. Pérez Hernández Francisco Gadiel
 
-**Fork:**
-**Rama:**
-
-> Contesten en este archivo. Respuestas breves y concretas: se califica que
-> hayan entendido, no la extensión.
+**Fork: https://github.com/fujonanda/tarea1-mini-interprete.git**
+**Rama: tarea1-pruebas-refactorizacion**
 
 ---
 
@@ -19,27 +15,24 @@
 
 | Componente | Qué recibe | Qué entrega | De qué es responsable |
 |---|---|---|---|
-| `lexer` | | | |
-| `parser` | | | |
-| `ast` | | | |
-| `evaluator` | | | |
+| `lexer` |Secuencia de caracteres del código fuente|Unidades con significado (tokens)|Convertir caracteres en tokens con un significado que la computadora pueda entender|
+| `parser` |Secuencia de tokens|Representación estructurada de la relación entre los tokens|Definir cómo pueden relacionarse los tokens entre sí considerando las reglas gramáticales|
+| `ast` |Datos obtenidos del parser|Estructura que representa la jerarquía de los tokens|Representar las operaciones y la jerarquía de los tokens presentes en el programa|
+| `evaluator` |La representación de las operaciones hechas a los tokens|El resultado de evaluar las operaciones|Determinar si la operación puede producir un resultado o si se trata de un error|
 
 ### 1.2 ¿Qué recorrido sigue una expresión desde que se recibe como texto hasta que produce un resultado?
+Primero pasa por el lexer que se encarga de separar la expresión en tokens con significado para la computadora, los tokens pasan al parser donde se usan las reglas gramáticales definidas por el lenguaje para crear una representación del orden que llevan las operaciones, dicha representación puede tratarse de un AST, después el evaluator analiza la estructura de la representación creada y determina si la operación es correcta para producir su resultado, en caso de ser incorrecta la marca como un error
 
 > Usen `(3 + 4) * 2` como ejemplo y muestren cómo se ve entre etapa y etapa.
 
 | Etapa | Cómo se ve `(3 + 4) * 2` aquí |
 |---|---|
 | texto | `"(3 + 4) * 2"` |
-| tokens | |
-| AST | |
-| resultado | |
+| tokens | [Token(PAR_IZQ, "(", 0), Token(NUMERO, 3, 1), Token(MAS, "+", 3), Token(NUMERO, 4, 5), Token(PAR_DER, ")", 6), Token (POR, "*", 8), Token(NUMERO, 2, 10)] |
+| AST | Raíz: [Operador "*"] Nivel 1: [Número 2] [Operador "+"] Nivel 2: [Número 3] [Número 4] |
+| resultado | 14 |
 
-> Para el renglón del AST, dibújenlo **primero ustedes** y después comprueben
-> con `python3 interprete.py --arbol "(3 + 4) * 2"`. Si su dibujo y el del
-> programa no coinciden, uno de los dos está mal, y averiguar cuál es
-> justamente el trabajo.
-
+El AST dibujado por el equipo antes de hacer la prueba coincidió con el dibujo del árbol realizado por el programa
 ---
 
 ## 2. Las pruebas que ya estaban
@@ -48,16 +41,46 @@
 
 | Prueba | Componente | Comportamiento que verifica | ¿Cuántos operadores usa? | ¿Normal, frontera o inválida? |
 |---|---|---|---|---|
-| | | | | |
-
-> Llenen la tabla **completa**, con las 13. Es tediosa a propósito: la única
-> forma de saber qué no está cubierto es caracterizar sistemáticamente lo que
-> sí. Cuando terminen, léanla como columna, no como renglones, y pregúntense
-> qué combinación **no aparece nunca**.
+| `test_suma` | Evaluator | Calcular bien la suma de 2 enteros. | 1 (`+`) | Normal |
+| `test_resta` | Evaluator | Calcular bien la resta de 2 enteros. | 1 (`-`) | Normal |
+| `test_multiplicacion` | Evaluator | Calcular correctamente el producto/multiplicación de 2 enteros. | 1 (`*`) | Normal |
+| `test_division` | Evaluator | Calcular correctamnete la división de 2 enteros. | 1 (`/`) | Normal |
+| `test_precedencia_sin_parentesis` | Evaluator | El resultado respetando la jerarquía con base a la precedencia implícita. | 2 (`+`, `*`) | Normal |
+| `test_precedencia_con_parentesis` | Evaluator | El resultado alterando la prioridad jerárquica con paréntesis. | 2 (`+`, `*`) | Normal |
+| `test_tokeniza_un_numero_solo` | Lexer | "Tokenización" de un número entero a... un token | 0 | Normal |
+| `test_tokeniza_una_suma` | Lexer | Reconocimiento de operandos y operador binario, así como su secuencia correcta de ejecución. | 1 (`+`) | Normal |
+| `test_los_espacios_no_producen_tokens` | Lexer | Descarta la existencia de cualquier espacio blanco para no hacerlo token.| 1 (`+`) | Frontera |
+| `test_tokeniza_parentesis` | Lexer | Denota a los paréntesis/símbolos de agrupación para la cohesión estructural. | 0 | Normal |
+| `test_construye_el_arbol_de_una_suma` | Parser | Construcción de un AST de un solo nivel para representar la suma (como que el nombre del test es muy explicatorio per se, para todos). | 1 (`+`) | Normal |
+| `test_la_multiplicacion_se_agrupa_antes_que_la_suma` | Parser | Anidar a los nodos propiamente priorizand la multiplicación (racismo de operandos). | 2 (`+`, `*`) | Normal |
+| `test_los_parentesis_cambian_la_agrupacion` | Parser | Anidar a los nodos con base a los paréntesis. | 2 (`+`, `*`) | Normal |
 
 ### 2.2 ¿Qué comportamientos **no** estaban probados?
 
-> Ésta es la pregunta importante de toda la tarea. Tómense su tiempo.
+Para lexer:
+1. Reconocer a números de varios dígitos y a símbolos como tokens
+2. Responder correctamente a las operaciones sin importar los espacios y saltos de línea que se ingresen
+3. Manejar el caso en el que se ingrese un caracter con el que el programa no pueda trabajar
+4. Manejar el caso en el que se ingresen letras junto a los números
+
+Para parser:
+1. Colocar el operador "*" (multiplicación) en un nivel inferior al operador "+" (suma) en el AST
+2. Realizar las operaciones con resta en orden de izquierda a derecha cuando no hay paréntesis ni operaciones de mayor jerarquía
+3. Realizar las operaciones con división en orden de izquierda a derecha cuando no hay paréntesis ni operaciones de menor jerarquía
+4. Manejar el caso en el que un paréntesis no se cierre correctamente
+5. Manejar el caso en el que se ingrese una operación que no contenga ningún operador
+
+Para evaluator:
+1. Realizar operaciones corretamente que contengan paréntesis dentro de otros paréntesis
+2. Realizar correctamente las operaciones que involucren tres números
+3. Realizar correctamente operaciones donde haya dos operandos involucrados
+4. Manejar en caso en el que se haga una división cualquiera con el 0 como divisor
+5. Manejar el caso en el que se intenten realizar operaciones con números negativos
+6. Producir un resultado flotante para las divisiones
+7. Realizar operaciones binarias en un AST de forma correcta
+8. Producir un resultado negativo para una resta cuando sea el caso
+9. Rechazar símbolos que no representen números ni operandos en un AST
+10. Manejar el caso en el que se intente dividir un número entre 0 en un árbol binario
 
 ---
 
@@ -67,50 +90,121 @@
 
 | Prueba (archivo::nombre) | Entrada | Esperado | Categoría | ¿Por qué esa categoría? |
 |---|---|---|---|---|
-| | | | | |
+| `test_reconocer_operacion_basica` | "13 + 3" | [Token(TipoToken.NUMERO, 13, 0), Token(TipoToken.MAS, "+", 3), Token(TipoToken.NUMERO, 3, 5)] | Normal | Es una operación que se realiza de forma común sin entradas que necesiten manejarse de forma particular |
+| `test_respuesta_a_espaciado_irregular` | "  45   \n * \t 2 " | [Token(TipoToken.NUMERO, 45, 2), Token(TipoToken.POR, "*", 10), Token(TipoToken.NUMERO, 2, 14)] | Frontera | Incluye espacios y saltos de línea que no se espera que se ingresen como entrada pero con los que el programa aún es capaz de producir una respuesta |
+| `test_caracter_desconocido_invalido` | "6 $ 9" | ErrorDeSintaxis | Inválido | El caracter "$" no está definido como un comando del intérprete entonces no se considera como una entrada válida |
+| `test_letras_vocabulario_invalido` | "10a + 5" | ErrorDeSintaxis | Inválido | El programa solo trabaja con números constantes y operandos, añadir letras no produce resultados |
+| `test_multiplicacion_abajo_de_la_suma` | "7 + 5 * 10" | Parser(tokenizar(entrada)).parsear() | Normal | Es una operación que se realiza de forma común y que el programa puede manejar fácilmente |
+| `test_orden_izquierda_a_derecha_division` | "36 / 6 / 3" | OperacionBinaria("/", OperacionBinaria("/", Numero(36), Numero(6)), Numero(3)) | Frontera | La operación debe realizarse en un orden específico, de lo contrario producirá un resultado erróneo |
+| `test_falta_parentesis` | "(24 - 27" | ErrorDeSintaxis, match="se esperaba ')'" | Inválido | Todos los paréntesis abiertos durante una operación deben cerrarse para que esta pueda llevarse a cabo |
+| `test_falta_operador` | "2 12" | ErrorDeSintaxis | Inválido | Una operación sin un operador definido no puede realizarse |
+| `test_parentesis_dentro_de_parentesis_1` | "(21 - (4 / 2)) * 3" | 57.0 | Normal | Es una operación con valores y operaciones comunes cuyo orden está bien definido por paréntesis |
+| `test_parentesis_dentro_de_parentesis_2` | "6 + ((7 / 2) * 8)" | 34.0 | Normal | Define un caso casi idéntico al anterior con un sencillo cambio de orden |
+| `test_suma_de_tres` | "10 + 4 + 3" | 17 | Frontera | Se prueba el orden en el que se ejecuta la operación de la suma para más de dos números sin distintas jerarquías ni paréntesis |
+| `test_resta_de_tres` | "10 - 5 - 3" | 2 | Frontera | Se prueba lo mismo que en el caso anterior, esta vez es más importante ya que la resta es suceptible a arrojar resultados distintos al cambiar el orden de la misma operación |
+| `test_multiplicacion_de_tres` | "6 * 3 * 2" | 36 | Frontera | Comprueba el orden para el caso de la multiplicación |
+| `test_division_de_tres` | "50 / 2 / 5" | 5.0 | Frontera | Comprueba el orden para el caso de la división que, del mismo modo que la resta, se ve afectada por cambios de orden |
+| `test_suma_y_resta` | "20 + 10 - 8" | 22 | Frontera | Pone a prueba el orden para dos operaciones distintas de la misma jerarquía (suma y resta) |
+| `test_resta_y_suma` | "7 - 4 + 2" | 5 | Frontera | Prueba lo mismo que el caso anterior, siendo ahora una de ellas afectada por el orden de la operación |
+| `test_multiplicacion_y_division` | "4 * 20 / 5" | 16.0 | Frontera | Prueba el orden para una operación que involucra una multiplicación y una división, las cuales se encuentran en la misma jerarquía, sin uso de paréntesis |
+| `test_division_y_multiplicacion` | "36 / 3 * 2" | 24.0 | Frontera | Hace la misma prueba que el caso anterior con la resta siendo afectada por cambios en el orden de la operación |
+| `test_division_entre_cero` | "10 / 0" | ErrorDeEvaluacion, match="division entre cero" | Frontera | La división sobre 0 se encuentra definida a pesar de que se pueda usar para hacer más operaciones como un número válido |
+| `test_suma_con_negativos` | "-3 + -4" | ErrorDeSintaxis | Inválido | El programa no soporta números con signo fuera del definido por el operador |
+| `test_resta_con_negativos` | "-10 - -7" | ErrorDeSintaxis | Inválido | No se pueden ingresar números con signo al programa |
+| `test_multiplicacion_con_negativos` | "-5 * -9" | ErrorDeSintaxis | Inválido | El programa solo permite números representados con su valor absoluto |
+| `test_division_con_negativos` | "-16 / -8" | ErrorDeSintaxis | Inválido | No se admiten números con signo para las operaciones del programa |
+| `test_suma_basica_en_AST` | OperacionBinaria("+", Numero(6), Numero(7)) | 13 | Normal | Plantea una operación binaria sencilla usando el operador "+" con números comunes y admitidos por el programa |
+| `test_resta_basica_en_AST` | OperacionBinaria("-", Numero(9), Numero(3)) | 6 | Normal | Define una operación con "-" y números fácilmente manejables |
+| `test_producto_basico_en_AST` | OperacionBinaria("*", Numero(9), Numero(11)) | 99 | Normal | Realiza una operación con el operador "*" y números con los que el programa puede trabajar cómodamente |
+| `test_division_valida_con_float_decimal` | OperacionBinaria("/", Numero(13), Numero(2)) | 6.5 | Normal | Prueba realizar una división sencilla y su capacidad para producir resultados de tipo flotante |
+| `test_resta_con_resultado_negativo` | OperacionBinaria("-", Numero(9), Numero(11)) | -2 | Frontera | Comprueba que una resta puede generar resultados negativos si se da el caso |
+| `test_operador_desconocido_invalido` | OperacionBinaria("^", Numero(6), Numero(7)) | ErrorDeEvaluacion | Inválido | No se pueden ingresar caracteres distintos a los operadores y números con los que trabaja el programa |
+| `test_nodo_desconocido` | "Salu2 bella profesora o bello profesor. Este nodo debe fallar al no ser uno del AST, solo un string" | ErrorDeEvaluacion | Inválido | Un nodo no puede contener un dato distinto a un número o uno de los operadores definidos por el programa |
+| `test_division_por_cero_en_AST` | OperacionBinaria("/", Numero(93), Numero(0)) | ErrorDeEvaluacion, match="division entre cero" | Inválido | La división entre 0 es indefinida y no puede producir un resultado que se pueda representar con el intérprete |
 
 ---
 
 ## 4. Los defectos
 
 ### 4.1 ¿Qué defecto reveló primero una prueba nueva?
+Las operaciones que involucraban operaciones de la misma jerarquía y que no usaban paréntesis para definir un orden se resolvían comenzando por la derecha y terminando por la izquierda, lo que provocó que en operaciones con restas o divisiones de por medio el resultado fuera erróneo. Lo mismo ocurría para las operaciones binarias con los AST.
+A su vez, el programa no lanzaba los errores definidos para el caso en el que se ingresaran números junto con letras, se ingresaba un caracter desconocido el programa o no se agregara ningún operador a la operación.
+Para el caso en el que no se cerraba un paréntesis que ya se había abierto el programa lanzaba IndexError
 
 ### 4.2 ¿Por qué el comportamiento observado era incorrecto?
 
-> No basta con "daba mal". Digan contra qué lo están comparando: qué regla,
-> qué línea de la semántica declarada del README.
+- Línea 6 de la semántica: Indica que en caso de tener una operación con operadores de la misma precedencia estos deben asociarse a la izquierda, cosa que no pasó y es por eso que las operaciones de este tipo que involucraban operadores sensibles a los cambios de orden generaran resultados erróneos
+- Línea 8 de la semántica: Indica que las entradas erróneas deben rechazarse con ErrorDeSintaxis en lugar de errores propios de Python, esto no sucedía cuando se ingresaban caracteres que no se encontraban definidos en los comandos del intérprete o en su defecto cuando a una operación le faltaban tokens para considerarse válida
 
 ### 4.3 ¿Qué cambio realizaron?
 
 | Defecto | Entrada que lo revela | Daba | Debería dar | Commit rojo | Commit verde |
 |---|---|---|---|---|---|
-| | | | | | |
+| Las restas de más de tres números se asociaban hacia la derecha | "10 - 5 - 3" | 8 | 2 | 15a38d6 | b9833f8 |
+| Las divisiones de más de tres números se asociaban a la derecha | "50 / 2 / 5" | 125.0 | 5.0 | 15a38d6 | b9833f8 |
+| Las operaciones binarias se asociaban de derecha a izquierda | "36 / 6 / 3" | OperacionBinaria("/", OperacionBinaria("/", Numero(6), Numero(3)), Numero(36)) | OperacionBinaria("/", OperacionBinaria("/", Numero(36), Numero(6)), Numero(3)) | 14853c0 | b9833f8 |
+| Ingresar un caracter desconocido no lanzaba ErrorDeSintaxis | "6 $ 9" | No marcaba ningún errorErrorDeSintaxis | ErrorDeSintaxis | 87c06dd | 937e8d6 |
+| Ingresar números acompañados de letras no lanzaba ErrorDeSintaxis | "10a + 5" | No marcaba ningún errorErrorDeSintaxis | ErrorDeSintaxis | 87c06dd | 937e8d6 |
+| La falta del cierre de un paréntesis lanzaba IndexError | "(24 - 27" | IndexError | ErrorDeSintaxis | 14853c0 | b9833f8 |
+| La falta de operador en una operación no lanzaba ErrorDeSintaxis | "2 12" | No marcaba ningún errorErrorDeSintaxis | ErrorDeSintaxis | 14853c0 | b9833f8 |
 
 ### 4.4 ¿Cómo saben que la corrección es general y no sólo hace pasar ese ejemplo?
+
+Se cambió el funcionamiento general del programa no solo para adecuarse al alcance de las nuevas pruebas que se definieron, sino a cualquier otro caso que pudiera presentarse. En el parser se cambió la forma en la que se asocian las operaciones para que, sin importar de cuántos números y operadores conste, siempre se iniciará su resolución por la izquierda y se terminará por la derecha. Por su parte se definió en el lexer que se lance un ErrorDeSintaxis cada vez que aparezca un símbolo o caracter no definido como token válido para el intérprete
 
 ---
 
 ## 5. Diseño
 
 ### 5.1 ¿Qué duplicación o señal de mal diseño encontraron?
+A lo largo de los tres módulos (evaluator, lexer y parser) identificamos las siguientes señales de mal diseño:
 
-> Al menos dos. Usen el vocabulario de clase: duplicación, rigidez,
-> acoplamiento alto, condicionales repetidos, amplificación del cambio.
+Condicionales repetidos y alto acoplamiento (Evaluador):
+Evaluator dependía de una cadena muy larga de if isinstance(...) para saber qué operación se debe ejecutar. Esto causaba el alto acoplamiento con las clases del AST y una evidente duplicación de código, ya que en cada bloque se repetía la misma lógica para desempacar los nodos izquierdo y derecho.
+
+Rigidez y amplificación del cambio (Parser y Lexer):
+El parser presentaba una fuerte rigidez (incorrecto dicho sea de paso) al forzar la asociatividad a la derecha mediante recursión (usando if), dificultando que el código se adaptara a las correctas reglas matemáticas. Por otro lado, silenciar errores en el else del lexer y manejar mal los índices en el parser provocaban una amplificación del cambio: modificar o agregar un nuevo operador obligaba a realizar modificaciones en múltiples partes del código a la vez para evitar que el programa colapsara. Todo terminaba muy centrado en torno a esta rigidez y reducía su practicalidad para adaptarse con facilidad.
 
 ### 5.2 ¿Qué refactorización realizaron, y por qué conserva el comportamiento?
 
-> "Las pruebas siguen pasando" es parte de la respuesta, pero no toda.
-> ¿Por qué el cambio es equivalente?
+Aunque efectivamente el hecho de que "las pruebas siguen pasando" valida nuestro trabajo y es punto fuerte, la certeza de que el código conserva su comportamiento radica en la naturaleza estructural de los cambios que realizamos (asimismo, añado un poco a esto en DECLARACION_IA.md):
+
+Pattern Matching en el Evaluador: Reemplazamos la cadena de if isinstance(...) por match / case. Conserva el comportamiento porque es una equivalencia para asignaciones: el árbol (AST) que entra se mantiene igual y las operaciones aritméticas que se aplican (+, -, *, /; lo básico) no cambian. Solo delegamos el chequeo de tipos y la extracción de variables al motor declarativo nativo de Python.
+
+Bucle while en lugar de recursión en el Parser: Cambiamos el if (recursión a la derecha) por un while (acumulación iterativa a la izquierda). Conserva el comportamiento porque los métodos per se no cambian (reciben tokens y devuelven un nodo). Además, para expresiones simples, ambos enfoques generan exactamente el mismo árbol. El cambio solo altera la estructura interna cuando hay operadores encadenados para que se cumpla la asociatividad por la izquierda (no sé cuántas veces he dicho esto de asoc. izq. hasta este punto), corrigiendo la falla matemático sin deshacer la interfaz.
+
+Excepciones explícitas en el Lexer: Cambiamos i += 1) en el bloque else por un raise ErrorDeSintaxis. Conserva el comportamiento porque, ante cualquier expresión matemáticamente válida, algo bien hecho, ese bloque nunca se ejecuta, y el lexer produce los mismos tokens que antes. Si está bien, pasará bien. El cambio solo se activa para interceptar lo que no está bien hecho, lo que no es válido, haciendo explícito un error que antes corrompía el flujo.
 
 ### 5.3 ¿Sería pertinente usar Factory Method, Adapter o ninguno?
 
-> Justifiquen. **"Ninguno" puede ser la respuesta correcta.** Si dicen que sí,
-> digan qué problema concreto resuelve y qué costo tiene. Si dicen que no,
-> digan qué tendría que cambiar en el sistema para que empezara a convenir.
+Contemplándolo así y ya tras haber evaluado los códigos en evaluator, lexer y parser. Dada la sencillez y humildad de este proyecto estudiantil (véase, es algo simple), incluir cualquiera de estos solo vuelve más compleja la lectura y no optimiza/soluciona nada. 
+
+Sobre Factory Method:
+Actualmente, el Parser instancia directamente las clases del Árbol de Sintaxis Abstracta (AST), las cuales son mínimas y concretas (Numero y OperacionBinaria).
+
+¿Qué tendría que cambiar para que convenga? Tendríamos que extender a gran escala la gramática del lenguaje (por ejemplo, para soportar variables, ciclos, condicionales, funciones y tipos de datos como cadenas o booleanos). En ese escenario, un Factory Method ayudaría a centralizar la lógica de creación de una extensa familia de nodos AST sin saturar al parser (los métodos).
+
+Sobre Adapter:
+Tal vez sea una minimización o no, pero todo lo que está aquí: lexer, evaluator y parser, es nativo de nuestro curso y trabajo académico. Las interfaces fueron diseñadas a la medida para fluir naturalmente: el Parser consume la lista exacta de Token que produce el Lexer, y el Evaluador espera exactamente el AST que arma el Parser.
+
+¿Qué tendría que cambiar para que convenga? Tendríamos que integrar una herramienta externa de ajenos. Por ejemplo, si decidiéramos usar una librería externa de análisis léxico que generara una estructura de datos incompatible, usaríamos un Adapter para traducir los tokens generados por esa librería a la estructura interna que nuestro Parser ya sabe consumir. Por lo mientras, así como está, no requiere para nada un Adapter, a menos que ya estuviera pensado para trabajar con externos. 
 
 ### 5.4 ¿Qué parte del sistema sería más difícil de modificar si se agregara un operador nuevo?
 
-> Por ejemplo `%`. ¿Cuántos archivos hay que tocar? ¿Por qué?
+La parte más difícil y delicada de modificar, comprobado por el trabajo hecho en esta tarea, sería el Parser.
+
+Si agregamos el operador módulo (%), sufriríamos de amplificación del cambio, ya que tendríamos que tocar prácticamente todos los archivos del pipeline (4 archivos en total):
+
+tokens.py: Agregar el nuevo tipo de token (ej. TipoToken.MODULO).
+
+lexer.py: Enseñar al analizador léxico a reconocer el símbolo % y generar su token correspondiente.
+
+evaluador.py: Agregar un nuevo bloque en el match / case para ejecutar la operación matemática nativa de Python (izq % der).
+
+parser.py (El más crítico por lejos): Modificar la lógica de agrupamiento.
+
+¿Por qué el Parser es el más difícil?
+En el Lexer y el Evaluador, el cambio es trivial (solo agregar una línea de mapeo); no es solo opinión, porque en este trabajo solo son como entre 3 a 5 renglones de cambio, o hasta menos. No obstante, en el Parser requerimos de un conocimiento de la gramática formal y la precedencia (jerarquía de operaciones). Para el operador %, no es suficiente su adición sin más, pues es necesario saberx en qué método incluirlo. Como % tiene la misma precedencia que la multiplicación y la división, debe integrarse específicamente en la condición del bucle while dentro del método _termino(). Colocarlo por error en _expresion() (junto a la suma y resta) causaría un fallo nuevo en el orden matemático de evaluación de todo el intérprete (una vez más, el trabajo aquí lo avala, el parser sufrió más cambios; no es mucho en líneas, pero es fácilmente 3 veces lo que se hizo en el lexer y evaluator juntos).
 
 ---
 

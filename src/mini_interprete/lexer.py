@@ -4,6 +4,7 @@
 """
 
 from .tokens import Token, TipoToken
+from .errores import ErrorDeSintaxis
 
 SIMBOLOS = {
     "+": TipoToken.MAS,
@@ -35,7 +36,12 @@ def tokenizar(texto: str) -> list:
             tokens.append(Token(SIMBOLOS[caracter], caracter, i))
             i += 1
 
-        else:
+        elif caracter in SIMBOLOS:
+            tokens.append(Token(SIMBOLOS[caracter], caracter, i))
             i += 1
+
+        else:
+            # CAMBIO PRINCIPAL: En lugar de ignorarlo, lanzamos un error
+            raise ErrorDeSintaxis(f"caracter no reconocido: {caracter!r}", i)
 
     return tokens
