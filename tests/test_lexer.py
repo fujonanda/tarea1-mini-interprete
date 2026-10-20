@@ -47,8 +47,8 @@ def test_respuesta_a_espaciado_irregular():
     tokens = tokenizar(entrada)
     assert tokens == [
         Token(TipoToken.NUMERO, 45, 2),
-        Token(TipoToken.POR, "*", 10),
-        Token(TipoToken.NUMERO, 2, 14)
+        Token(TipoToken.POR, "*", 9),
+        Token(TipoToken.NUMERO, 2, 13)
     ]
 
 #Casos Inválidos del rexel

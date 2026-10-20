@@ -49,9 +49,10 @@ def test_orden_izquierda_a_derecha_division():
 # Casos inválidos
 
 def test_falta_parentesis():
-    entrada = "(24 - 27"
-    with pytest.raises(ErrorDeSintaxis, match="se esperaba ')'"):
-        Parser(tokenizar(entrada)).parsear()
+        entrada = "(24 - 27"
+        with pytest.raises(ErrorDeSintaxis, match=r"se esperaba '\)'"):
+            parser = Parser(tokenizar(entrada))
+            parser.parsear()
 
 def test_falta_operador():
     entrada = "2 12"
