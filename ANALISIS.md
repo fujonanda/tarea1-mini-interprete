@@ -90,7 +90,37 @@ Para evaluator:
 
 | Prueba (archivo::nombre) | Entrada | Esperado | Categoría | ¿Por qué esa categoría? |
 |---|---|---|---|---|
-| | | | | |
+| `test_reconocer_operacion_basica` | "13 + 3" | [Token(TipoToken.NUMERO, 13, 0), Token(TipoToken.MAS, "+", 3), Token(TipoToken.NUMERO, 3, 5)] | Normal | Es una operación que se realiza de forma común sin entradas que necesiten manejarse de forma particular |
+| `test_respuesta_a_espaciado_irregular` | "  45   \n * \t 2 " | [Token(TipoToken.NUMERO, 45, 2), Token(TipoToken.POR, "*", 10), Token(TipoToken.NUMERO, 2, 14)] | Frontera | Incluye espacios y saltos de línea que no se espera que se ingresen como entrada pero con los que el programa aún es capaz de producir una respuesta |
+| `test_caracter_desconocido_invalido` | "6 $ 9" | ErrorDeSintaxis | Inválido | El caracter "$" no está definido como un comando del intérprete entonces no se considera como una entrada válida |
+| `test_letras_vocabulario_invalido` | "10a + 5" | ErrorDeSintaxis | Inválido | El programa solo trabaja con números constantes y operandos, añadir letras no produce resultados |
+| `test_multiplicacion_abajo_de_la_suma` | "7 + 5 * 10" | Parser(tokenizar(entrada)).parsear() | Normal | Es una operación que se realiza de forma común y que el programa puede manejar fácilmente |
+| `test_orden_izquierda_a_derecha_division` | "36 / 6 / 3" | OperacionBinaria("/", OperacionBinaria("/", Numero(36), Numero(6)), Numero(3)) | Frontera | La operación debe realizarse en un orden específico, de lo contrario producirá un resultado erróneo |
+| `test_falta_parentesis` | "(24 - 27" | ErrorDeSintaxis, match="se esperaba ')'" | Inválido | Todos los paréntesis abiertos durante una operación deben cerrarse para que esta pueda llevarse a cabo |
+| `test_falta_operador` | "2 12" | ErrorDeSintaxis | Inválido | Una operación sin un operador definido no puede realizarse |
+| `test_parentesis_dentro_de_parentesis_1` | "(21 - (4 / 2)) * 3" | 57.0 | Normal | Es una operación con valores y operaciones comunes cuyo orden está bien definido por paréntesis |
+| `test_parentesis_dentro_de_parentesis_2` | "6 + ((7 / 2) * 8)" | 34.0 | Normal | Define un caso casi idéntico al anterior con un sencillo cambio de orden |
+| `test_suma_de_tres` | "10 + 4 + 3" | 17 | Frontera | Se prueba el orden en el que se ejecuta la operación de la suma para más de dos números sin distintas jerarquías ni paréntesis |
+| `test_resta_de_tres` | "10 - 5 - 3" | 2 | Frontera | Se prueba lo mismo que en el caso anterior, esta vez es más importante ya que la resta es suceptible a arrojar resultados distintos al cambiar el orden de la misma operación |
+| `test_multiplicacion_de_tres` | "6 * 3 * 2" | 36 | Frontera | Comprueba el orden para el caso de la multiplicación |
+| `test_division_de_tres` | "50 / 2 / 5" | 5.0 | Frontera | Comprueba el orden para el caso de la división que, del mismo modo que la resta, se ve afectada por cambios de orden |
+| `test_suma_y_resta` | "20 + 10 - 8" | 22 | Frontera | Pone a prueba el orden para dos operaciones distintas de la misma jerarquía (suma y resta) |
+| `test_resta_y_suma` | "7 - 4 + 2" | 5 | Frontera | Prueba lo mismo que el caso anterior, siendo ahora una de ellas afectada por el orden de la operación |
+| `test_multiplicacion_y_division` | "4 * 20 / 5" | 16.0 | Frontera | Prueba el orden para una operación que involucra una multiplicación y una división, las cuales se encuentran en la misma jerarquía, sin uso de paréntesis |
+| `test_division_y_multiplicacion` | "36 / 3 * 2" | 24.0 | Frontera | Hace la misma prueba que el caso anterior con la resta siendo afectada por cambios en el orden de la operación |
+| `test_division_entre_cero` | "10 / 0" | ErrorDeEvaluacion, match="division entre cero" | Frontera | La división sobre 0 se encuentra definida a pesar de que se pueda usar para hacer más operaciones como un número válido |
+| `test_suma_con_negativos` | "-3 + -4" | ErrorDeSintaxis | Inválido | El programa no soporta números con signo fuera del definido por el operador |
+| `test_resta_con_negativos` | "-10 - -7" | ErrorDeSintaxis | Inválido | No se pueden ingresar números con signo al programa |
+| `test_multiplicacion_con_negativos` | "-5 * -9" | ErrorDeSintaxis | Inválido | El programa solo permite números representados con su valor absoluto |
+| `test_division_con_negativos` | "-16 / -8" | ErrorDeSintaxis | Inválido | No se admiten números con signo para las operaciones del programa |
+| `test_suma_basica_en_AST` | OperacionBinaria("+", Numero(6), Numero(7)) | 13 | Normal | Plantea una operación binaria sencilla usando el operador "+" con números comunes y admitidos por el programa |
+| `test_resta_basica_en_AST` | OperacionBinaria("-", Numero(9), Numero(3)) | 6 | Normal | Define una operación con "-" y números fácilmente manejables |
+| `test_producto_basico_en_AST` | OperacionBinaria("*", Numero(9), Numero(11)) | 99 | Normal | Realiza una operación con el operador "*" y números con los que el programa puede trabajar cómodamente |
+| `test_division_valida_con_float_decimal` | OperacionBinaria("/", Numero(13), Numero(2)) | 6.5 | Normal | Prueba realizar una división sencilla y su capacidad para producir resultados de tipo flotante |
+| `test_resta_con_resultado_negativo` | OperacionBinaria("-", Numero(9), Numero(11)) | -2 | Frontera | Comprueba que una resta puede generar resultados negativos si se da el caso |
+| `test_operador_desconocido_invalido` | OperacionBinaria("^", Numero(6), Numero(7)) | ErrorDeEvaluacion | Inválido | No se pueden ingresar caracteres distintos a los operadores y números con los que trabaja el programa |
+| `test_nodo_desconocido` | "Salu2 bella profesora o bello profesor. Este nodo debe fallar al no ser uno del AST, solo un string" | ErrorDeEvaluacion | Inválido | Un nodo no puede contener un dato distinto a un número o uno de los operadores definidos por el programa |
+| `test_division_por_cero_en_AST` | OperacionBinaria("/", Numero(93), Numero(0)) | ErrorDeEvaluacion, match="division entre cero" | Inválido | La división entre 0 es indefinida y no puede producir un resultado que se pueda representar con el intérprete |
 
 ---
 
