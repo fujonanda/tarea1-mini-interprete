@@ -157,24 +157,54 @@ Se cambió el funcionamiento general del programa no solo para adecuarse al alca
 ## 5. Diseño
 
 ### 5.1 ¿Qué duplicación o señal de mal diseño encontraron?
+A lo largo de los tres módulos (evaluator, lexer y parser) identificamos las siguientes señales de mal diseño:
 
-> Al menos dos. Usen el vocabulario de clase: duplicación, rigidez,
-> acoplamiento alto, condicionales repetidos, amplificación del cambio.
+Condicionales repetidos y alto acoplamiento (Evaluador):
+Evaluator dependía de una cadena muy larga de if isinstance(...) para saber qué operación se debe ejecutar. Esto causaba el alto acoplamiento con las clases del AST y una evidente duplicación de código, ya que en cada bloque se repetía la misma lógica para desempacar los nodos izquierdo y derecho.
+
+Rigidez y amplificación del cambio (Parser y Lexer):
+El parser presentaba una fuerte rigidez (incorrecto dicho sea de paso) al forzar la asociatividad a la derecha mediante recursión (usando if), dificultando que el código se adaptara a las correctas reglas matemáticas. Por otro lado, silenciar errores en el else del lexer y manejar mal los índices en el parser provocaban una amplificación del cambio: modificar o agregar un nuevo operador obligaba a realizar modificaciones en múltiples partes del código a la vez para evitar que el programa colapsara. Todo terminaba muy centrado en torno a esta rigidez y reducía su practicalidad para adaptarse con facilidad.
 
 ### 5.2 ¿Qué refactorización realizaron, y por qué conserva el comportamiento?
 
-> "Las pruebas siguen pasando" es parte de la respuesta, pero no toda.
-> ¿Por qué el cambio es equivalente?
+Aunque efectivamente el hecho de que "las pruebas siguen pasando" valida nuestro trabajo y es punto fuerte, la certeza de que el código conserva su comportamiento radica en la naturaleza estructural de los cambios que realizamos (asimismo, añado un poco a esto en DECLARACION_IA.md):
+
+Pattern Matching en el Evaluador: Reemplazamos la cadena de if isinstance(...) por match / case. Conserva el comportamiento porque es una equivalencia para asignaciones: el árbol (AST) que entra se mantiene igual y las operaciones aritméticas que se aplican (+, -, *, /; lo básico) no cambian. Solo delegamos el chequeo de tipos y la extracción de variables al motor declarativo nativo de Python.
+
+Bucle while en lugar de recursión en el Parser: Cambiamos el if (recursión a la derecha) por un while (acumulación iterativa a la izquierda). Conserva el comportamiento porque los métodos per se no cambian (reciben tokens y devuelven un nodo). Además, para expresiones simples, ambos enfoques generan exactamente el mismo árbol. El cambio solo altera la estructura interna cuando hay operadores encadenados para que se cumpla la asociatividad por la izquierda (no sé cuántas veces he dicho esto de asoc. izq. hasta este punto), corrigiendo la falla matemático sin deshacer la interfaz.
+
+Excepciones explícitas en el Lexer: Cambiamos i += 1) en el bloque else por un raise ErrorDeSintaxis. Conserva el comportamiento porque, ante cualquier expresión matemáticamente válida, algo bien hecho, ese bloque nunca se ejecuta, y el lexer produce los mismos tokens que antes. Si está bien, pasará bien. El cambio solo se activa para interceptar lo que no está bien hecho, lo que no es válido, haciendo explícito un error que antes corrompía el flujo.
 
 ### 5.3 ¿Sería pertinente usar Factory Method, Adapter o ninguno?
 
-> Justifiquen. **"Ninguno" puede ser la respuesta correcta.** Si dicen que sí,
-> digan qué problema concreto resuelve y qué costo tiene. Si dicen que no,
-> digan qué tendría que cambiar en el sistema para que empezara a convenir.
+Contemplándolo así y ya tras haber evaluado los códigos en evaluator, lexer y parser. Dada la sencillez y humildad de este proyecto estudiantil (véase, es algo simple), incluir cualquiera de estos solo vuelve más compleja la lectura y no optimiza/soluciona nada. 
+
+Sobre Factory Method:
+Actualmente, el Parser instancia directamente las clases del Árbol de Sintaxis Abstracta (AST), las cuales son mínimas y concretas (Numero y OperacionBinaria).
+
+¿Qué tendría que cambiar para que convenga? Tendríamos que extender a gran escala la gramática del lenguaje (por ejemplo, para soportar variables, ciclos, condicionales, funciones y tipos de datos como cadenas o booleanos). En ese escenario, un Factory Method ayudaría a centralizar la lógica de creación de una extensa familia de nodos AST sin saturar al parser (los métodos).
+
+Sobre Adapter:
+Tal vez sea una minimización o no, pero todo lo que está aquí: lexer, evaluator y parser, es nativo de nuestro curso y trabajo académico. Las interfaces fueron diseñadas a la medida para fluir naturalmente: el Parser consume la lista exacta de Token que produce el Lexer, y el Evaluador espera exactamente el AST que arma el Parser.
+
+¿Qué tendría que cambiar para que convenga? Tendríamos que integrar una herramienta externa de ajenos. Por ejemplo, si decidiéramos usar una librería externa de análisis léxico que generara una estructura de datos incompatible, usaríamos un Adapter para traducir los tokens generados por esa librería a la estructura interna que nuestro Parser ya sabe consumir. Por lo mientras, así como está, no requiere para nada un Adapter, a menos que ya estuviera pensado para trabajar con externos. 
 
 ### 5.4 ¿Qué parte del sistema sería más difícil de modificar si se agregara un operador nuevo?
 
-> Por ejemplo `%`. ¿Cuántos archivos hay que tocar? ¿Por qué?
+La parte más difícil y delicada de modificar, comprobado por el trabajo hecho en esta tarea, sería el Parser.
+
+Si agregamos el operador módulo (%), sufriríamos de amplificación del cambio, ya que tendríamos que tocar prácticamente todos los archivos del pipeline (4 archivos en total):
+
+tokens.py: Agregar el nuevo tipo de token (ej. TipoToken.MODULO).
+
+lexer.py: Enseñar al analizador léxico a reconocer el símbolo % y generar su token correspondiente.
+
+evaluador.py: Agregar un nuevo bloque en el match / case para ejecutar la operación matemática nativa de Python (izq % der).
+
+parser.py (El más crítico por lejos): Modificar la lógica de agrupamiento.
+
+¿Por qué el Parser es el más difícil?
+En el Lexer y el Evaluador, el cambio es trivial (solo agregar una línea de mapeo); no es solo opinión, porque en este trabajo solo son como entre 3 a 5 renglones de cambio, o hasta menos. No obstante, en el Parser requerimos de un conocimiento de la gramática formal y la precedencia (jerarquía de operaciones). Para el operador %, no es suficiente su adición sin más, pues es necesario saberx en qué método incluirlo. Como % tiene la misma precedencia que la multiplicación y la división, debe integrarse específicamente en la condición del bucle while dentro del método _termino(). Colocarlo por error en _expresion() (junto a la suma y resta) causaría un fallo nuevo en el orden matemático de evaluación de todo el intérprete (una vez más, el trabajo aquí lo avala, el parser sufrió más cambios; no es mucho en líneas, pero es fácilmente 3 veces lo que se hizo en el lexer y evaluator juntos).
 
 ---
 
