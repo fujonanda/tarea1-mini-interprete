@@ -55,11 +55,11 @@ class Parser:
         izquierda = self._termino()
         actual = self._actual()
         
-        # CAMBIO 1: while en lugar de if para asociar a la izquierda
+        # CAMBIO 1: while preferible sobre if para asociar a la izquierda
         while actual is not None and actual.tipo in OPERADORES_SUMA:
             operador = self._avanzar()
             derecha = self._termino() # Llamamos al nivel inferior, no a _expresion
-            # Encadenamos el arbol acumulando hacia la izquierda
+            # Encadenamos el arbol acumulando hacia la izquierda (arreglamos la asociatividad)
             izquierda = OperacionBinaria(operador.valor, izquierda, derecha)
             actual = self._actual()
             
@@ -69,7 +69,7 @@ class Parser:
         izquierda = self._factor()
         actual = self._actual()
         
-        # CAMBIO 2: while en lugar de if para asociar a la izquierda, y por ende corregir la asociatividad mal desarrollada (desde el punto matemático)
+        # CAMBIO 2: while sobre el uso de if para asociar a la izquierda, y por ende corregir la asociatividad mal desarrollada (desde el punto matemático)
         while actual is not None and actual.tipo in OPERADORES_PRODUCTO:
             operador = self._avanzar()
             derecha = self._factor() # Llamamos al nivel inferior
@@ -91,7 +91,7 @@ class Parser:
         if token.tipo == TipoToken.PAR_IZQ:
             nodo = self._expresion()
             
-            # CAMBIO 3: Proteger al cierre de parentesis contra el fin de la lista
+            # CAMBIO 3: Proteger al cierre de parentesis contra el fin de la lista (aquí es donde fallaba por no cerrar la expresión)
             cierre = self._actual()
             if cierre is None or cierre.tipo != TipoToken.PAR_DER:
                 pos_error = cierre.posicion if cierre else self.pos
